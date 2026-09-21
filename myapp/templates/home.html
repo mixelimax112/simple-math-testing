@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Django Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to My Django Project! 🎉</h1>
+        <p>Your Django application is successfully running.</p>
+
+        <h2>Available Endpoints:</h2>
+
+        <div class="endpoint">
+            <strong>Home Page:</strong><br>
+            <code>GET /</code> - This page
+        </div>
+
+        <div class="endpoint">
+            <strong>Hello API:</strong><br>
+            <code>GET /hello/</code> - Returns a greeting message<br>
+            <small>Try: <a href="/hello/?name=YourName">/hello/?name=YourName</a></small>
+        </div>
+
+        <div class="endpoint">
+            <strong>Admin Panel:</strong><br>
+            <code>GET /admin/</code> - Django admin interface
+        </div>
+    </div>
+</body>
+</html>
