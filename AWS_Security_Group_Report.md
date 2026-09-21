@@ -1,20 +1,16 @@
-# AWS Security Group - Лабораторная работа
+AWS Security Group - Лабораторная работа
 
-**Дата:** 30.07.2026  
-**Студент:** Maksym Kravchenko  
-**Группа:** 121225-PTM
+Дата: 30.07.2026  
+Студент: Maksym Kravchenko  
+Группа: 121225-PTM
 
----
-
-## Задание
+Задание
 
 Создать Security Group для AWS EC2 с правилами доступа для MySQL, HTTPS и SSH.
 
----
+Выполнение
 
-## Выполнение
-
-### 1. Создание Security Group
+1. Создание Security Group
 
 Создал новую Security Group с помощью AWS CLI:
 
@@ -26,11 +22,11 @@ aws ec2 create-security-group \
 
 Получил ID: `sg-00f7ea92647f689b2`
 
-### 2. Настройка правил входящего трафика
+2. Настройка правил входящего трафика
 
 Добавил три правила для входящего трафика:
 
-**MySQL (порт 3306):**
+MySQL (порт 3306):
 ```bash
 aws ec2 authorize-security-group-ingress \
   --group-id sg-00f7ea92647f689b2 \
@@ -39,7 +35,7 @@ aws ec2 authorize-security-group-ingress \
   --cidr 0.0.0.0/0
 ```
 
-**HTTPS (порт 443):**
+HTTPS (порт 443):
 ```bash
 aws ec2 authorize-security-group-ingress \
   --group-id sg-00f7ea92647f689b2 \
@@ -48,7 +44,7 @@ aws ec2 authorize-security-group-ingress \
   --cidr 0.0.0.0/0
 ```
 
-**SSH (порт 22):**
+SSH (порт 22):
 ```bash
 aws ec2 authorize-security-group-ingress \
   --group-id sg-00f7ea92647f689b2 \
@@ -57,7 +53,7 @@ aws ec2 authorize-security-group-ingress \
   --cidr 109.41.240.21/32
 ```
 
-### 3. Проверка настроек
+3. Проверка настроек
 
 Проверил созданную Security Group:
 
@@ -65,17 +61,15 @@ aws ec2 authorize-security-group-ingress \
 aws ec2 describe-security-groups --group-ids sg-00f7ea92647f689b2
 ```
 
----
+Результаты
 
-## Результаты
+Security Group ID: sg-00f7ea92647f689b2  
+Имя: 20260730-maksym-kravchenko-121225ptm-sg  
+VPC: vpc-0a02936a83dd85c84  
+Регион: us-east-1  
+Мой IP адрес: 109.41.240.21
 
-**Security Group ID:** sg-00f7ea92647f689b2  
-**Имя:** 20260730-maksym-kravchenko-121225ptm-sg  
-**VPC:** vpc-0a02936a83dd85c84  
-**Регион:** us-east-1  
-**Мой IP адрес:** 109.41.240.21
-
-### Таблица правил
+Таблица правил
 
 | Порт | Протокол | Источник | Назначение |
 |------|----------|----------|------------|
@@ -83,9 +77,7 @@ aws ec2 describe-security-groups --group-ids sg-00f7ea92647f689b2
 | 3306 | TCP      | 0.0.0.0/0 | MySQL database |
 | 443  | TCP      | 0.0.0.0/0 | HTTPS трафик |
 
----
-
-## Выводы
+Выводы
 
 В ходе выполнения лабораторной работы:
 - Изучил работу с AWS CLI для управления Security Groups
