@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
+from pydantic import BaseModel, Field, field_validator
+from typing import Optional
 
 app = Flask(__name__)
 
@@ -12,6 +14,63 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
+# === PYDANTIC СХЕМЫ ДЛЯ ВАЛІДАЦІЇ ===
+
+# Схема CategoryBase для сериализации и валидации
+class CategoryBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100, description="Название категории")
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        """Проверка, что название не пустое и не состоит только из пробелов"""
+        if not v.strip():
+            raise ValueError('Название категории не может быть пустым')
+        return v.strip()
+
+
+# Схема для создания категории
+class CategoryCreate(CategoryBase):
+    pass
+
+
+# Схема для ответа с информацией о категории
+class CategoryResponse(CategoryBase):
+    id: int
+    questions_count: int
+
+    class Config:
+        from_attributes = True
+
+
+# Схема QuestionCreate для интеграции данных о категории
+class QuestionCreate(BaseModel):
+    text: str = Field(..., min_length=5, max_length=500, description="Текст вопроса")
+    category_id: int = Field(..., gt=0, description="ID категории")
+
+    @field_validator('text')
+    @classmethod
+    def validate_text(cls, v: str) -> str:
+        """Проверка, что текст вопроса не пустой"""
+        if not v.strip():
+            raise ValueError('Текст вопроса не может быть пустым')
+        return v.strip()
+
+
+# Схема для ответа с информацией о вопросе
+class QuestionResponse(BaseModel):
+    id: int
+    text: str
+    category_id: int
+    category_name: Optional[str] = None
+    created_at: str
+
+    class Config:
+        from_attributes = True
+
+
+# === SQLALCHEMY МОДЕЛИ ===
 
 # Модель Category
 class Category(db.Model):
@@ -117,15 +176,18 @@ def get_category(id):
 def create_category():
     data = request.get_json()
 
-    if not data or 'name' not in data:
-        return jsonify({'success': False, 'message': 'Поле "name" обязательно'}), 400
+    # Валидация данных через Pydantic
+    try:
+        category_data = CategoryCreate(**data)
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Ошибка валидации: {str(e)}'}), 400
 
     # Проверка на существование категории с таким именем
-    existing = Category.query.filter_by(name=data['name']).first()
+    existing = Category.query.filter_by(name=category_data.name).first()
     if existing:
         return jsonify({'success': False, 'message': 'Категория с таким именем уже существует'}), 400
 
-    category = Category(name=data['name'])
+    category = Category(name=category_data.name)
     db.session.add(category)
     db.session.commit()
 
@@ -178,7 +240,6 @@ def delete_category(id):
     })
 
 
-# === ВОПРОСЫ ===
 
 # Получить все вопросы
 @app.route('/api/questions', methods=['GET'])
@@ -191,7 +252,6 @@ def get_questions():
     })
 
 
-# Получить вопрос по ID
 @app.route('/api/questions/<int:id>', methods=['GET'])
 def get_question(id):
     question = Question.query.get(id)
@@ -204,7 +264,7 @@ def get_question(id):
     })
 
 
-# Получить вопросы категории
+
 @app.route('/api/categories/<int:id>/questions', methods=['GET'])
 def get_category_questions(id):
     category = Category.query.get(id)
@@ -219,20 +279,23 @@ def get_category_questions(id):
     })
 
 
-# Создать новый вопрос
+
 @app.route('/api/questions', methods=['POST'])
 def create_question():
     data = request.get_json()
 
-    if not data or 'text' not in data or 'category_id' not in data:
-        return jsonify({'success': False, 'message': 'Поля "text" и "category_id" обязательны'}), 400
 
-    # Проверка существования категории
-    category = Category.query.get(data['category_id'])
+    try:
+        question_data = QuestionCreate(**data)
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Ошибка валидации: {str(e)}'}), 400
+
+
+    category = Category.query.get(question_data.category_id)
     if not category:
         return jsonify({'success': False, 'message': 'Категория не найдена'}), 404
 
-    question = Question(text=data['text'], category_id=data['category_id'])
+    question = Question(text=question_data.text, category_id=question_data.category_id)
     db.session.add(question)
     db.session.commit()
 
@@ -243,7 +306,7 @@ def create_question():
     }), 201
 
 
-# Обновить вопрос
+
 @app.route('/api/questions/<int:id>', methods=['PUT'])
 def update_question(id):
     question = Question.query.get(id)
@@ -272,7 +335,7 @@ def update_question(id):
     })
 
 
-# Удалить вопрос
+
 @app.route('/api/questions/<int:id>', methods=['DELETE'])
 def delete_question(id):
     question = Question.query.get(id)
@@ -288,12 +351,12 @@ def delete_question(id):
     })
 
 
-# Инициализация базы данных и тестовые данные
+
 def init_db():
     with app.app_context():
         db.create_all()
 
-        # Добавляем тестовые данные, если база пустая
+
         if Category.query.count() == 0:
             categories = [
                 Category(name='История'),
