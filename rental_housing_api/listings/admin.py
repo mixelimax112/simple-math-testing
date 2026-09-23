@@ -32,7 +32,7 @@ class ListingAdmin(SimpleHistoryAdmin):
             'fields': ('city', 'district')
         }),
         ('Характеристики', {
-            'fields': ('housing_type', 'rooms_count', 'max_guests', 'price', 'price_currency')
+            'fields': ('housing_type', 'rooms_count', 'max_guests', 'price')
         }),
         ('Статус', {
             'fields': ('is_active', 'deleted_at')
@@ -43,7 +43,7 @@ class ListingAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'deleted_at']
 
 
 @admin.register(ListingPhoto)

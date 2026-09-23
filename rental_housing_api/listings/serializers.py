@@ -30,6 +30,8 @@ class ListingSerializer(serializers.ModelSerializer):
     photos = ListingPhotoSerializer(many=True, read_only=True)
     blocked_dates = BlockedDateSerializer(many=True, read_only=True)
     owner_name = serializers.CharField(source='owner.name', read_only=True)
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='price.amount')
+    price_currency = serializers.CharField(source='price.currency')
 
     class Meta:
         model = Listing
@@ -44,6 +46,8 @@ class ListingSerializer(serializers.ModelSerializer):
 
 
 class ListingCreateSerializer(serializers.ModelSerializer):
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+
     class Meta:
         model = Listing
         fields = [
@@ -54,12 +58,16 @@ class ListingCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
+        price_value = validated_data.pop('price')
+        validated_data['price'] = price_value
         return super().create(validated_data)
 
 
 class ListingListSerializer(serializers.ModelSerializer):
     first_photo = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='price.amount', read_only=True)
+    price_currency = serializers.CharField(source='price.currency', read_only=True)
 
     class Meta:
         model = Listing

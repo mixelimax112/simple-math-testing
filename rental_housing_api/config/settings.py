@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'drf_spectacular',
-    'simple_history',
     'djmoney',
 
     'core',
@@ -51,7 +50,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
